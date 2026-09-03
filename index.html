@@ -1,0 +1,1191 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <meta name="theme-color" content="#111827">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Gym Tracker">
+  <meta name="description" content="Tracker allenamenti offline">
+
+  <link rel="manifest" href="./manifest.json">
+
+  <title>Gym Tracker</title>
+
+  <style>
+    :root {
+      --bg: #0b1020;
+      --panel: #151c2f;
+      --panel2: #1c253b;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --primary: #6366f1;
+      --primary-dark: #4f46e5;
+      --success: #22c55e;
+      --danger: #ef4444;
+      --border: #2b3650;
+      --input: #0f172a;
+      --radius: 16px;
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html {
+      background: var(--bg);
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      padding-bottom: env(safe-area-inset-bottom);
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      min-height: 100vh;
+    }
+
+    button, input, select {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    .app {
+      max-width: 760px;
+      margin: auto;
+      min-height: 100vh;
+    }
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      padding: calc(14px + env(safe-area-inset-top)) 18px 14px;
+      background: rgba(11,16,32,.94);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 24px;
+    }
+
+    header p {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    main {
+      padding: 18px;
+      padding-bottom: 100px;
+    }
+
+    .tab {
+      display: none;
+    }
+
+    .tab.active {
+      display: block;
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      margin-bottom: 14px;
+    }
+
+    .card h2,
+    .card h3 {
+      margin: 0 0 12px;
+    }
+
+    .muted {
+      color: var(--muted);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    label {
+      display: block;
+      color: var(--muted);
+      font-size: 13px;
+      margin-bottom: 6px;
+    }
+
+    input, select {
+      width: 100%;
+      border: 1px solid var(--border);
+      background: var(--input);
+      color: var(--text);
+      border-radius: 10px;
+      padding: 12px;
+      outline: none;
+    }
+
+    input:focus, select:focus {
+      border-color: var(--primary);
+    }
+
+    .btn {
+      border: 0;
+      border-radius: 11px;
+      padding: 12px 15px;
+      background: var(--primary);
+      color: white;
+      font-weight: 700;
+      min-height: 44px;
+    }
+
+    .btn:active {
+      transform: scale(.98);
+    }
+
+    .btn.secondary {
+      background: var(--panel2);
+      border: 1px solid var(--border);
+    }
+
+    .btn.success {
+      background: var(--success);
+      color: #052e16;
+    }
+
+    .btn.danger {
+      background: var(--danger);
+    }
+
+    .btn.small {
+      padding: 8px 10px;
+      min-height: 36px;
+      font-size: 13px;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .routine {
+      background: var(--panel2);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 13px;
+      margin-top: 10px;
+    }
+
+    .routine-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .exercise {
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 14px;
+      margin-top: 12px;
+      background: #11192b;
+    }
+
+    .exercise-title {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: flex-start;
+    }
+
+    .exercise-title strong {
+      font-size: 16px;
+    }
+
+    .last {
+      color: #a5b4fc;
+      font-size: 12px;
+      margin: 5px 0 12px;
+    }
+
+    .set-row {
+      display: grid;
+      grid-template-columns: 36px 1fr 1fr auto;
+      gap: 7px;
+      align-items: end;
+      margin-top: 8px;
+    }
+
+    .set-number {
+      color: var(--muted);
+      font-size: 13px;
+      padding-bottom: 12px;
+      text-align: center;
+    }
+
+    .history-item {
+      border-bottom: 1px solid var(--border);
+      padding: 13px 0;
+    }
+
+    .history-item:last-child {
+      border-bottom: 0;
+    }
+
+    .history-date {
+      font-weight: 700;
+      margin-bottom: 7px;
+    }
+
+    .history-exercise {
+      font-size: 14px;
+      margin-top: 5px;
+    }
+
+    .empty {
+      text-align: center;
+      padding: 30px 10px;
+      color: var(--muted);
+    }
+
+    nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 30;
+      background: rgba(15,23,42,.97);
+      border-top: 1px solid var(--border);
+      padding: 8px max(10px, env(safe-area-inset-left)) calc(8px + env(safe-area-inset-bottom));
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+    }
+
+    nav button {
+      background: transparent;
+      color: var(--muted);
+      border: 0;
+      padding: 9px 4px;
+      border-radius: 10px;
+      font-size: 12px;
+    }
+
+    nav button.active {
+      color: white;
+      background: var(--panel2);
+    }
+
+    .timer {
+      position: fixed;
+      left: 50%;
+      transform: translateX(-50%);
+      bottom: calc(78px + env(safe-area-inset-bottom));
+      z-index: 25;
+      background: #312e81;
+      border: 1px solid #6366f1;
+      border-radius: 15px;
+      padding: 10px 15px;
+      display: none;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 10px 30px rgba(0,0,0,.35);
+    }
+
+    .timer.visible {
+      display: flex;
+    }
+
+    .timer strong {
+      font-size: 20px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .stat {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+
+    .stat-box {
+      background: var(--panel2);
+      padding: 15px;
+      border-radius: 13px;
+      text-align: center;
+    }
+
+    .stat-box strong {
+      display: block;
+      font-size: 25px;
+    }
+
+    .danger-text {
+      color: #fca5a5;
+    }
+
+    .success-text {
+      color: #86efac;
+    }
+
+    @media (min-width: 600px) {
+      .set-row {
+        grid-template-columns: 40px 1fr 1fr 120px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+<div class="app">
+
+  <header>
+    <h1>🏋️ Gym Tracker</h1>
+    <p id="subtitle">Allenamento offline</p>
+  </header>
+
+  <main>
+
+    <!-- ALLENAMENTO -->
+    <section id="tab-workout" class="tab active">
+      <div class="card">
+        <h2>Allenamento</h2>
+        <label for="workoutRoutine">Routine</label>
+        <select id="workoutRoutine"></select>
+      </div>
+
+      <div id="workoutArea"></div>
+    </section>
+
+    <!-- ROUTINE -->
+    <section id="tab-routines" class="tab">
+      <div class="card">
+        <h2>Nuova routine</h2>
+
+        <label for="routineName">Nome routine</label>
+        <input id="routineName" placeholder="Es. Push / Pull / Legs">
+
+        <div id="newExercises"></div>
+
+        <div class="actions">
+          <button class="btn secondary" id="addExerciseBtn">+ Esercizio</button>
+          <button class="btn" id="saveRoutineBtn">Salva routine</button>
+        </div>
+
+        <p class="muted" style="font-size:12px;margin-top:10px">
+          Puoi creare e conservare più di 24 routine.
+        </p>
+      </div>
+
+      <div class="card">
+        <h2>Le mie routine</h2>
+        <div id="routineList"></div>
+      </div>
+
+      <div class="card">
+        <h2>Backup</h2>
+        <p class="muted">Esporta tutti i dati o ripristinali da un backup JSON.</p>
+
+        <div class="actions">
+          <button class="btn secondary" id="exportBtn">⬇️ Esporta JSON</button>
+          <button class="btn secondary" id="importBtn">⬆️ Importa JSON</button>
+          <input type="file" id="importFile" accept=".json,application/json" hidden>
+        </div>
+      </div>
+    </section>
+
+    <!-- STORICO -->
+    <section id="tab-history" class="tab">
+      <div class="card">
+        <h2>Statistiche</h2>
+        <div class="stat">
+          <div class="stat-box">
+            <strong id="statWorkouts">0</strong>
+            <span class="muted">Allenamenti</span>
+          </div>
+          <div class="stat-box">
+            <strong id="statSets">0</strong>
+            <span class="muted">Serie completate</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Storico</h2>
+        <div id="historyList"></div>
+      </div>
+    </section>
+
+  </main>
+
+  <div class="timer" id="timer">
+    <strong id="timerValue">01:30</strong>
+    <button class="btn small secondary" id="timerStop">Chiudi</button>
+  </div>
+
+  <nav>
+    <button class="active" data-tab="workout">🏋️<br>Allenamento</button>
+    <button data-tab="routines">📋<br>Routine</button>
+    <button data-tab="history">📊<br>Storico</button>
+  </nav>
+</div>
+
+<script>
+"use strict";
+
+/* =========================================================
+   STORAGE
+========================================================= */
+
+const STORAGE_KEY = "gymTrackerOffline_v1";
+
+const defaultData = {
+  routines: [],
+  history: []
+};
+
+function loadData() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return structuredClone(defaultData);
+
+    const parsed = JSON.parse(raw);
+
+    return {
+      routines: Array.isArray(parsed.routines) ? parsed.routines : [],
+      history: Array.isArray(parsed.history) ? parsed.history : []
+    };
+  } catch (error) {
+    console.error(error);
+    return structuredClone(defaultData);
+  }
+}
+
+let data = loadData();
+
+function saveData() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
+
+/* =========================================================
+   UTILS
+========================================================= */
+
+const $ = id => document.getElementById(id);
+
+function uid(prefix = "id") {
+  return prefix + "_" + Date.now().toString(36) + "_" +
+    Math.random().toString(36).slice(2, 8);
+}
+
+function escapeHTML(value) {
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+function formatDate(timestamp) {
+  return new Intl.DateTimeFormat("it-IT", {
+    dateStyle: "medium",
+    timeStyle: "short"
+  }).format(new Date(timestamp));
+}
+
+function formatWeight(value) {
+  return Number(value || 0).toLocaleString("it-IT", {
+    maximumFractionDigits: 2
+  });
+}
+
+/* =========================================================
+   NAVIGAZIONE
+========================================================= */
+
+document.querySelectorAll("nav button").forEach(button => {
+  button.addEventListener("click", () => {
+    const name = button.dataset.tab;
+
+    document.querySelectorAll("nav button")
+      .forEach(b => b.classList.toggle("active", b === button));
+
+    document.querySelectorAll(".tab")
+      .forEach(section => section.classList.remove("active"));
+
+    $("tab-" + name).classList.add("active");
+
+    if (name === "workout") renderWorkout();
+    if (name === "routines") renderRoutines();
+    if (name === "history") renderHistory();
+  });
+});
+
+/* =========================================================
+   ROUTINE CREATION
+========================================================= */
+
+function addExerciseInput(name = "") {
+  const container = $("newExercises");
+
+  const row = document.createElement("div");
+  row.className = "exercise";
+  row.innerHTML = `
+    <div class="grid">
+      <div style="grid-column:1/-1">
+        <label>Nome esercizio</label>
+        <input class="exercise-name" placeholder="Es. Panca piana" value="${escapeHTML(name)}">
+      </div>
+      <div>
+        <label>Serie</label>
+        <input class="exercise-sets" type="number" min="1" max="50" value="3">
+      </div>
+      <div>
+        <label>Recupero (secondi)</label>
+        <input class="exercise-rest" type="number" min="0" max="3600" value="90">
+      </div>
+    </div>
+
+    <div class="actions">
+      <button type="button" class="btn danger small remove-exercise">
+        Rimuovi
+      </button>
+    </div>
+  `;
+
+  row.querySelector(".remove-exercise").addEventListener("click", () => {
+    row.remove();
+  });
+
+  container.appendChild(row);
+}
+
+$("addExerciseBtn").addEventListener("click", () => addExerciseInput());
+
+$("saveRoutineBtn").addEventListener("click", () => {
+  const name = $("routineName").value.trim();
+
+  if (!name) {
+    alert("Inserisci il nome della routine.");
+    return;
+  }
+
+  const rows = [...document.querySelectorAll("#newExercises .exercise")];
+
+  if (!rows.length) {
+    alert("Aggiungi almeno un esercizio.");
+    return;
+  }
+
+  const exercises = rows
+    .map(row => ({
+      id: uid("exercise"),
+      name: row.querySelector(".exercise-name").value.trim(),
+      sets: Math.max(1, Number(row.querySelector(".exercise-sets").value) || 3),
+      rest: Math.max(0, Number(row.querySelector(".exercise-rest").value) || 90)
+    }))
+    .filter(exercise => exercise.name);
+
+  if (!exercises.length) {
+    alert("Inserisci almeno il nome di un esercizio.");
+    return;
+  }
+
+  data.routines.push({
+    id: uid("routine"),
+    name,
+    exercises,
+    createdAt: Date.now()
+  });
+
+  saveData();
+
+  $("routineName").value = "";
+  $("newExercises").innerHTML = "";
+
+  addExerciseInput();
+
+  renderRoutines();
+  renderWorkout();
+
+  alert("Routine salvata.");
+});
+
+/* =========================================================
+   ROUTINE LIST
+========================================================= */
+
+function renderRoutines() {
+  const container = $("routineList");
+
+  if (!data.routines.length) {
+    container.innerHTML = `
+      <div class="empty">
+        Nessuna routine ancora.<br>
+        Crea la tua prima routine qui sopra.
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = data.routines.map(routine => `
+    <div class="routine">
+      <div class="routine-head">
+        <div>
+          <strong>${escapeHTML(routine.name)}</strong>
+          <div class="muted" style="font-size:12px;margin-top:4px">
+            ${routine.exercises.length} esercizi
+          </div>
+        </div>
+
+        <button class="btn danger small"
+          data-delete-routine="${routine.id}">
+          Elimina
+        </button>
+      </div>
+
+      <div style="margin-top:10px">
+        ${routine.exercises.map(exercise => `
+          <div class="muted" style="font-size:13px;margin-top:5px">
+            • ${escapeHTML(exercise.name)}
+            — ${exercise.sets} serie
+            — ${exercise.rest}s
+          </div>
+        `).join("")}
+      </div>
+    </div>
+  `).join("");
+
+  container.querySelectorAll("[data-delete-routine]").forEach(button => {
+    button.addEventListener("click", () => {
+      const id = button.dataset.deleteRoutine;
+      const routine = data.routines.find(r => r.id === id);
+
+      if (!routine) return;
+
+      if (!confirm(`Eliminare la routine "${routine.name}"?`)) return;
+
+      data.routines = data.routines.filter(r => r.id !== id);
+      saveData();
+
+      renderRoutines();
+      renderWorkout();
+    });
+  });
+}
+
+/* =========================================================
+   ULTIMO CARICO
+========================================================= */
+
+function getLastExerciseData(exerciseId, exerciseName) {
+  for (let i = data.history.length - 1; i >= 0; i--) {
+    const workout = data.history[i];
+
+    const exercise = workout.exercises?.find(e =>
+      e.exerciseId === exerciseId ||
+      e.name === exerciseName
+    );
+
+    if (exercise && exercise.sets?.length) {
+      const completed = exercise.sets.filter(s => s.completed);
+
+      if (completed.length) {
+        return completed[completed.length - 1];
+      }
+    }
+  }
+
+  return null;
+}
+
+/* =========================================================
+   WORKOUT
+========================================================= */
+
+let activeWorkout = null;
+
+function renderWorkout() {
+  const select = $("workoutRoutine");
+
+  if (!data.routines.length) {
+    select.innerHTML = `<option value="">Nessuna routine disponibile</option>`;
+    $("workoutArea").innerHTML = `
+      <div class="card empty">
+        Crea prima una routine nella sezione <b>Routine</b>.
+      </div>
+    `;
+    return;
+  }
+
+  const current = select.value;
+
+  select.innerHTML = data.routines.map(routine => `
+    <option value="${routine.id}">
+      ${escapeHTML(routine.name)}
+    </option>
+  `).join("");
+
+  if (data.routines.some(r => r.id === current)) {
+    select.value = current;
+  }
+
+  const routine = data.routines.find(r => r.id === select.value)
+    || data.routines[0];
+
+  select.value = routine.id;
+
+  renderWorkoutExercises(routine);
+}
+
+$("workoutRoutine").addEventListener("change", () => {
+  activeWorkout = null;
+  renderWorkout();
+});
+
+function renderWorkoutExercises(routine) {
+  const container = $("workoutArea");
+
+  if (!routine) {
+    container.innerHTML = "";
+    return;
+  }
+
+  if (!activeWorkout || activeWorkout.routineId !== routine.id) {
+    activeWorkout = {
+      routineId: routine.id,
+      startedAt: Date.now(),
+      exercises: {}
+    };
+  }
+
+  container.innerHTML = routine.exercises.map(exercise => {
+    const last = getLastExerciseData(exercise.id, exercise.name);
+
+    const state = activeWorkout.exercises[exercise.id] || {
+      sets: Array.from({length: exercise.sets}, () => ({
+        weight: last?.weight ?? "",
+        reps: last?.reps ?? "",
+        completed: false
+      }))
+    };
+
+    activeWorkout.exercises[exercise.id] = state;
+
+    return `
+      <div class="card exercise-card" data-exercise="${exercise.id}">
+        <div class="exercise-title">
+          <strong>${escapeHTML(exercise.name)}</strong>
+          <span class="muted">${exercise.sets} serie</span>
+        </div>
+
+        <div class="last">
+          ${last
+            ? `Ultima volta: ${formatWeight(last.weight)} kg × ${last.reps} rip.`
+            : "Nessun dato precedente"
+          }
+        </div>
+
+        <div class="sets">
+          ${state.sets.map((set, index) => `
+            <div class="set-row">
+              <div class="set-number">${index + 1}</div>
+
+              <div>
+                <label>Peso kg</label>
+                <input
+                  class="weight-input"
+                  type="number"
+                  inputmode="decimal"
+                  min="0"
+                  step="0.5"
+                  value="${escapeHTML(set.weight)}"
+                  data-index="${index}">
+              </div>
+
+              <div>
+                <label>Rip.</label>
+                <input
+                  class="reps-input"
+                  type="number"
+                  inputmode="numeric"
+                  min="0"
+                  max="1000"
+                  value="${escapeHTML(set.reps)}"
+                  data-index="${index}">
+              </div>
+
+              <button
+                class="btn ${set.completed ? "success" : ""} small complete-set"
+                data-index="${index}">
+                ${set.completed ? "✓" : "Completa"}
+              </button>
+            </div>
+          `).join("")}
+        </div>
+      </div>
+    `;
+  }).join("");
+
+  bindWorkoutInputs(routine);
+}
+
+function bindWorkoutInputs(routine) {
+  document.querySelectorAll(".exercise-card").forEach(card => {
+    const exerciseId = card.dataset.exercise;
+    const state = activeWorkout.exercises[exerciseId];
+    const exercise = routine.exercises.find(e => e.id === exerciseId);
+
+    card.querySelectorAll(".weight-input").forEach(input => {
+      input.addEventListener("input", () => {
+        state.sets[Number(input.dataset.index)].weight = input.value;
+      });
+    });
+
+    card.querySelectorAll(".reps-input").forEach(input => {
+      input.addEventListener("input", () => {
+        state.sets[Number(input.dataset.index)].reps = input.value;
+      });
+    });
+
+    card.querySelectorAll(".complete-set").forEach(button => {
+      button.addEventListener("click", () => {
+        const index = Number(button.dataset.index);
+        const set = state.sets[index];
+
+        if (!set.weight || !set.reps) {
+          alert("Inserisci peso e ripetizioni.");
+          return;
+        }
+
+        set.completed = !set.completed;
+
+        if (set.completed && exercise.rest > 0) {
+          startTimer(exercise.rest);
+        }
+
+        renderWorkoutExercises(routine);
+      });
+    });
+  });
+}
+
+/* =========================================================
+   SALVATAGGIO ALLENAMENTO
+========================================================= */
+
+const finishButton = document.createElement("button");
+finishButton.className = "btn success";
+finishButton.textContent = "✓ Termina e salva allenamento";
+
+function updateFinishButton() {
+  if (!$("workoutArea").contains(finishButton)) {
+    $("workoutArea").appendChild(finishButton);
+  }
+}
+
+finishButton.addEventListener("click", () => {
+  if (!activeWorkout) return;
+
+  const routine = data.routines.find(r => r.id === activeWorkout.routineId);
+
+  if (!routine) return;
+
+  const exercises = routine.exercises.map(exercise => {
+    const state = activeWorkout.exercises[exercise.id];
+
+    return {
+      exerciseId: exercise.id,
+      name: exercise.name,
+      sets: state?.sets || []
+    };
+  });
+
+  const completedSets = exercises.reduce(
+    (total, exercise) =>
+      total + exercise.sets.filter(set => set.completed).length,
+    0
+  );
+
+  if (!completedSets) {
+    alert("Completa almeno una serie prima di salvare.");
+    return;
+  }
+
+  data.history.push({
+    id: uid("workout"),
+    routineId: routine.id,
+    routineName: routine.name,
+    startedAt: activeWorkout.startedAt,
+    completedAt: Date.now(),
+    exercises
+  });
+
+  saveData();
+
+  activeWorkout = null;
+
+  alert("Allenamento salvato nello storico.");
+
+  renderWorkout();
+  renderHistory();
+});
+
+const originalRenderWorkoutExercises = renderWorkoutExercises;
+
+function renderWorkoutExercisesWithButton(routine) {
+  originalRenderWorkoutExercises(routine);
+  updateFinishButton();
+}
+
+renderWorkoutExercises = renderWorkoutExercisesWithButton;
+
+/* =========================================================
+   TIMER
+========================================================= */
+
+let timerInterval = null;
+let timerEnd = 0;
+
+function startTimer(seconds) {
+  clearInterval(timerInterval);
+
+  timerEnd = Date.now() + seconds * 1000;
+  $("timer").classList.add("visible");
+
+  updateTimer();
+
+  timerInterval = setInterval(updateTimer, 250);
+
+  if ("vibrate" in navigator) {
+    try {
+      navigator.vibrate(100);
+    } catch (_) {}
+  }
+}
+
+function updateTimer() {
+  const remaining = Math.max(0, timerEnd - Date.now());
+
+  const totalSeconds = Math.ceil(remaining / 1000);
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+
+  $("timerValue").textContent =
+    String(minutes).padStart(2, "0") + ":" +
+    String(seconds).padStart(2, "0");
+
+  if (remaining <= 0) {
+    clearInterval(timerInterval);
+    $("timer").classList.remove("visible");
+
+    if ("vibrate" in navigator) {
+      try {
+        navigator.vibrate([200, 100, 200]);
+      } catch (_) {}
+    }
+  }
+}
+
+$("timerStop").addEventListener("click", () => {
+  clearInterval(timerInterval);
+  $("timer").classList.remove("visible");
+});
+
+/* =========================================================
+   STORICO
+========================================================= */
+
+function renderHistory() {
+  const container = $("historyList");
+
+  const workouts = [...data.history].sort(
+    (a, b) => b.completedAt - a.completedAt
+  );
+
+  $("statWorkouts").textContent = workouts.length;
+
+  const totalSets = workouts.reduce(
+    (total, workout) =>
+      total +
+      workout.exercises.reduce(
+        (sum, exercise) =>
+          sum + exercise.sets.filter(s => s.completed).length,
+        0
+      ),
+    0
+  );
+
+  $("statSets").textContent = totalSets;
+
+  if (!workouts.length) {
+    container.innerHTML = `
+      <div class="empty">
+        Nessun allenamento registrato.
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = workouts.map(workout => `
+    <div class="history-item">
+      <div class="history-date">
+        ${escapeHTML(workout.routineName)}
+      </div>
+
+      <div class="muted" style="font-size:12px">
+        ${formatDate(workout.completedAt)}
+      </div>
+
+      ${workout.exercises.map(exercise => {
+        const completed = exercise.sets.filter(s => s.completed);
+
+        if (!completed.length) return "";
+
+        return `
+          <div class="history-exercise">
+            <strong>${escapeHTML(exercise.name)}</strong><br>
+            <span class="muted">
+              ${completed.map(s =>
+                `${formatWeight(s.weight)} kg × ${s.reps}`
+              ).join(" · ")}
+            </span>
+          </div>
+        `;
+      }).join("")}
+    </div>
+  `).join("");
+}
+
+/* =========================================================
+   EXPORT
+========================================================= */
+
+$("exportBtn").addEventListener("click", () => {
+  const backup = {
+    app: "Gym Tracker",
+    version: 1,
+    exportedAt: new Date().toISOString(),
+    data
+  };
+
+  const blob = new Blob(
+    [JSON.stringify(backup, null, 2)],
+    {type: "application/json"}
+  );
+
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+
+  a.href = url;
+  a.download =
+    "gym-tracker-backup-" +
+    new Date().toISOString().slice(0, 10) +
+    ".json";
+
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+});
+
+/* =========================================================
+   IMPORT
+========================================================= */
+
+$("importBtn").addEventListener("click", () => {
+  $("importFile").click();
+});
+
+$("importFile").addEventListener("change", event => {
+  const file = event.target.files[0];
+
+  if (!file) return;
+
+  const reader = new FileReader();
+
+  reader.onload = () => {
+    try {
+      const parsed = JSON.parse(reader.result);
+
+      const importedData = parsed.data || parsed;
+
+      if (
+        !importedData ||
+        !Array.isArray(importedData.routines) ||
+        !Array.isArray(importedData.history)
+      ) {
+        throw new Error("Formato non valido");
+      }
+
+      if (!confirm(
+        "L'importazione sostituirà i dati attuali. Continuare?"
+      )) {
+        return;
+      }
+
+      data = {
+        routines: importedData.routines,
+        history: importedData.history
+      };
+
+      saveData();
+
+      activeWorkout = null;
+
+      renderRoutines();
+      renderWorkout();
+      renderHistory();
+
+      alert("Backup importato correttamente.");
+    } catch (error) {
+      console.error(error);
+      alert("File JSON non valido o danneggiato.");
+    }
+  };
+
+  reader.readAsText(file);
+
+  event.target.value = "";
+});
+
+/* =========================================================
+   SERVICE WORKER
+========================================================= */
+
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./sw.js")
+      .then(() => console.log("Service Worker attivo"))
+      .catch(error =>
+        console.error("Service Worker:", error)
+      );
+  });
+}
+
+/* =========================================================
+   INIT
+========================================================= */
+
+addExerciseInput();
+renderRoutines();
+renderWorkout();
+renderHistory();
+</script>
+
+</body>
+</html>
