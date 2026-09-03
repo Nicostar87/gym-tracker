@@ -1,0 +1,20 @@
+{
+  "name": "Gym Tracker Offline",
+  "short_name": "Gym Tracker",
+  "description": "Tracker di allenamento completamente offline",
+  "lang": "it-IT",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0b1020",
+  "theme_color": "#111827",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='110' fill='%236366f1'/%3E%3Cg fill='white'%3E%3Crect x='92' y='220' width='70' height='72' rx='15'/%3E%3Crect x='350' y='220' width='70' height='72' rx='15'/%3E%3Crect x='155' y='190' width='45' height='132' rx='12'/%3E%3Crect x='312' y='190' width='45' height='132' rx='12'/%3E%3Crect x='195' y='235' width='122' height='42' rx='18'/%3E%3C/g%3E%3C/svg%3E",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
